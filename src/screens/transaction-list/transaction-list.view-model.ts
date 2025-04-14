@@ -1,3 +1,7 @@
+import useTransactionListDisplay from './hooks/use-transaction-list-display.hook';
+
 export default function useTransactionListViewModel() {
-  return {};
+  const transactionListDisplay = useTransactionListDisplay();
+
+  return {transactionListDisplay};
 }

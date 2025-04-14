@@ -1,4 +1,4 @@
-import {Transaction} from '@services/api/models/transaction.model';
+import {Transaction} from '../../models/transaction.model';
 
 export type GetTransactionsRes = Record<string, Transaction>;
 
