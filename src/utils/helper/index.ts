@@ -237,3 +237,9 @@ export function formatDate(date: Date): string {
     year: 'numeric',
   }).format(date);
 }
+
+export function capitalizeBank(str: string) {
+  return str.length > 4
+    ? [str[0].toUpperCase(), str.slice(1)].join('')
+    : str.toUpperCase();
+}

@@ -1,6 +1,7 @@
-import {useMemo} from 'react';
+import {useNavigation} from '@react-navigation/native';
+import {useCallback, useMemo} from 'react';
 import {SearchBarProps} from '../../../components/search-bar/search-bar.component';
-import {TransactionItemProps} from '../../../components/transaction-item/transaction-item.component';
+import {TransactionData} from '../../../components/transaction-item/transaction-item.component';
 import useTransactionList, {
   SortProperties,
 } from '../../../hooks/use-transaction-list/use-transaction-list.hook';
@@ -15,7 +16,17 @@ export default function useTransactionListDisplay() {
   const {data, changeSearchValue, changeSortBy, searchValue} =
     useTransactionList();
 
-  const items: TransactionItemProps[] = useMemo(
+  const navigation = useNavigation();
+
+  const handleTransactionPress = useCallback(
+    (transaction: TransactionData) => {
+      navigation.setOptions({});
+      navigation.navigate('TransactionDetail', {transaction});
+    },
+    [navigation],
+  );
+
+  const items: TransactionData[] = useMemo(
     () =>
       data?.map(item => ({
         id: item.id,
@@ -26,6 +37,9 @@ export default function useTransactionListDisplay() {
         status: item.status,
         statusLabel: STATUS_MAPPING[item.status],
         transactionDate: item.created_at,
+        accountNumber: item.account_number,
+        remark: item.remark,
+        uniqueCode: item.unique_code,
       })) ?? [],
     [data],
   );
@@ -64,5 +78,6 @@ export default function useTransactionListDisplay() {
     items,
     searchProps,
     sortProps,
+    handleTransactionPress,
   };
 }

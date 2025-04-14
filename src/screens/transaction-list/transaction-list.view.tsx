@@ -24,6 +24,7 @@ export default function TransactionListView() {
         items={transactionListDisplay.items}
         searchProps={transactionListDisplay.searchProps}
         sortProps={transactionListDisplay.sortProps}
+        onTransactionPress={transactionListDisplay.handleTransactionPress}
       />
     </SafeAreaView>
   );

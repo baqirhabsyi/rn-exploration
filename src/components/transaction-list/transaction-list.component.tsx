@@ -3,19 +3,21 @@ import {FlatList} from 'react-native';
 import {atoms} from '../../utils/style.util';
 import SearchBar, {SearchBarProps} from '../search-bar/search-bar.component';
 import TransactionItem, {
-  TransactionItemProps,
+  TransactionData,
 } from '../transaction-item/transaction-item.component';
 
 export type TransactionListProps = {
-  items: TransactionItemProps[];
+  items: TransactionData[];
   searchProps: SearchBarProps['search'];
   sortProps: SearchBarProps['sort'];
+  onTransactionPress: (transaction: TransactionData) => void;
 };
 
 export default function TransactionList({
   items,
   searchProps,
   sortProps,
+  onTransactionPress,
 }: TransactionListProps) {
   return (
     <FlatList
@@ -24,16 +26,7 @@ export default function TransactionList({
       data={items}
       contentContainerStyle={[atoms.gap_md]}
       renderItem={({item}) => (
-        <TransactionItem
-          amount={item.amount}
-          id={item.id}
-          recipientBank={item.recipientBank}
-          recipientName={item.recipientName}
-          senderBank={item.senderBank}
-          status={item.status}
-          statusLabel={item.statusLabel}
-          transactionDate={item.transactionDate}
-        />
+        <TransactionItem onTransactionPress={onTransactionPress} data={item} />
       )}
     />
   );
