@@ -12,6 +12,7 @@
     "lint-staged": "lint-staged"
   },
   "dependencies": {
+    "@react-native-clipboard/clipboard": "^1.16.2",
     "@react-native-vector-icons/common": "^11.0.0",
     "@react-native-vector-icons/fontawesome6": "^6.7.1",
     "@react-navigation/elements": "^2.3.8",
