@@ -1,5 +1,16 @@
-import Logger from '../logger';
+import Logger from './logger.util';
 
+/**
+ * Executes an asynchronous function with automatic retries on failure.
+ * Implements exponential backoff with jitter to avoid overwhelming the target service.
+ *
+ * @template T The expected return type of the function.
+ * @param fn The asynchronous function to execute.
+ * @param retries The maximum number of retry attempts (default: 3).
+ * @param initialDelay The initial delay in milliseconds before the first retry (default: 1000).
+ * @returns A promise resolving to the result of the function if successful.
+ * @throws Throws the last error encountered if all retries fail.
+ */
 export async function doWithRetry<T>(
   fn: () => Promise<T>,
   retries: number = 3,
@@ -41,10 +52,20 @@ export async function doWithRetry<T>(
     }
   }
 
-  // Start the process with the first attempt (attempt 0)
+  // Start the retry process with the first attempt (attempt 0).
   return attempt(0);
 }
 
+/**
+ * Sorts an array of objects alphabetically based on a specified key.
+ * Case-insensitive sorting.
+ *
+ * @template T The type of objects in the array.
+ * @param data The array of objects to sort.
+ * @param key The key of the object property to sort by.
+ * @param order The sort order: 'asc' (ascending) or 'desc' (descending) (default: 'asc').
+ * @returns A new sorted array (shallow copy).
+ */
 export function sortDataAlphabetically<T>(
   data: T[],
   key: keyof T,
@@ -66,6 +87,15 @@ export function sortDataAlphabetically<T>(
   });
 }
 
+/**
+ * Sorts an array of objects by date based on a specified key.
+ *
+ * @template T The type of objects in the array.
+ * @param data The array of objects to sort.
+ * @param key The key of the object property containing the date (should be parsable by `new Date()`).
+ * @param order The sort order: 'asc' (ascending) or 'desc' (descending) (default: 'asc').
+ * @returns A new sorted array (shallow copy).
+ */
 export function sortDataByDate<T>(
   data: T[],
   key: keyof T,
@@ -94,6 +124,16 @@ export function sortDataByDate<T>(
   });
 }
 
+/**
+ * Filters an array of objects based on a search value across multiple specified keys.
+ * Performs a case-insensitive, fuzzy search (checks if characters of the search value appear in order within the property value).
+ *
+ * @template T The type of objects in the array.
+ * @param data The array of objects to search within.
+ * @param keys An array of keys to check within each object.
+ * @param searchValue The value to search for (converted to string).
+ * @returns A new array containing only the items that match the search criteria.
+ */
 export function searchData<T>(
   data: T[],
   keys: (keyof T)[],
@@ -133,9 +173,9 @@ export function searchData<T>(
 
 /**
  * Creates a function composition pipeline.
- * Takes a sequence of functions and returns a new function that passes its input through each function in order.
- * Type-safe: Ensures the output of one function matches the input of the next.
- * Infers the final return type based on the last function in the sequence.
+ * Takes a sequence of functions and returns a new function that passes its input
+ * through each function in order, where the output of one is the input to the next.
+ * Provides type safety through function overloads.
  *
  * @example
  * const add5 = (x: number) => x + 5;
@@ -143,18 +183,16 @@ export function searchData<T>(
  * const numToString = (x: number) => String(x);
  *
  * const add5AndMultiplyBy2 = pipe(add5, multiplyBy2);
- * add5AndMultiplyBy2(10); // Output: 30, Type: number
+ * add5AndMultiplyBy2(10); // Output: 30
  *
  * const add5ThenString = pipe(add5, numToString);
- * add5ThenString(10); // Output: "15", Type: string
+ * add5ThenString(10); // Output: "15"
  *
- * // const invalidPipe = pipe(add5, numToString, add5); // Type error: string is not assignable to number
- *
- * @param fns The functions to compose. The first function takes the initial value, and subsequent functions take the output of the previous function.
- * @returns A new function that applies the sequence of functions to its input.
+ * @param fns The functions to compose in sequence.
+ * @returns A new function that represents the composition of the input functions.
  */
 
-// Overloads for type safety and inference
+// --- Function Overloads for Pipe (ensuring type safety) ---
 export function pipe<T>(): (initialValue: T) => T;
 export function pipe<T, R1>(f1: (arg: T) => R1): (initialValue: T) => R1;
 export function pipe<T, R1, R2>(
@@ -209,37 +247,61 @@ export function pipe<T, R1, R2, R3, R4, R5, R6, R7, R8>(
 
 // If you're piping more than 8 functions, good luck.
 
-// Implementation (uses 'any' internally, but overloads provide external type safety)
-export function pipe<T>(
-  ...fns: Array<(arg: any) => any>
+// --- Pipe Implementation ---
+export function pipe<T>( // Type T is the initial input type
+  ...fns: Array<(arg: any) => any> // Functions in the pipeline
 ): (initialValue: T) => any {
+  // Returns a function that takes T and returns the final result type
   if (fns.length === 0) {
-    return (initialValue: T) => initialValue; // Handle empty pipe case
+    return (initialValue: T) => initialValue; // Identity function if no functions are provided
   }
+  // Reduce the functions, passing the result of one to the next.
   return (initialValue: T) => fns.reduce((acc, fn) => fn(acc), initialValue);
 }
 
+/**
+ * Formats a number as Indonesian Rupiah (IDR) currency.
+ *
+ * @param amount The number to format.
+ * @returns A string representing the amount in IDR format (e.g., "Rp10.000").
+ */
 export function formatCurrency(amount: number): string {
-  // Format with Intl.NumberFormat first
+  // Use Intl.NumberFormat for locale-specific number formatting.
   const formatted = new Intl.NumberFormat('id-ID', {
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 0, // No decimal places for IDR typically.
     maximumFractionDigits: 0,
   }).format(amount);
 
-  // Remove the space after "Rp"
+  // Prepend "Rp" without a space.
   return `Rp${formatted}`;
 }
 
+/**
+ * Formats a Date object into a localized date string (Indonesian locale).
+ *
+ * @param date The Date object to format.
+ * @returns A string representing the date in a long format (e.g., "17 Agustus 2024").
+ */
 export function formatDate(date: Date): string {
+  // Use Intl.DateTimeFormat for locale-specific date formatting.
   return new Intl.DateTimeFormat('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+    day: 'numeric', // e.g., 17
+    month: 'long', // e.g., Agustus
+    year: 'numeric', // e.g., 2024
   }).format(date);
 }
 
+/**
+ * Capitalizes a bank name string according to specific rules:
+ * - If the string length is > 4, capitalize only the first letter.
+ * - Otherwise (length <= 4), convert the entire string to uppercase.
+ *
+ * @param str The bank name string to capitalize.
+ * @returns The capitalized bank name string.
+ */
 export function capitalizeBank(str: string) {
+  // Apply different capitalization based on length.
   return str.length > 4
-    ? [str[0].toUpperCase(), str.slice(1)].join('')
-    : str.toUpperCase();
+    ? [str[0].toUpperCase(), str.slice(1)].join('') // Capitalize first letter only
+    : str.toUpperCase(); // Uppercase the whole string
 }

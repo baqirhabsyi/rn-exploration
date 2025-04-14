@@ -3,7 +3,11 @@ import React, {memo, useCallback} from 'react';
 import {Pressable, StyleSheet, Text, View} from 'react-native';
 import {colors} from '../../constants/style.constant';
 import {TransactionStatus} from '../../services/api/models/transaction.model';
-import {capitalizeBank, formatCurrency, formatDate} from '../../utils/helper';
+import {
+  capitalizeBank,
+  formatCurrency,
+  formatDate,
+} from '../../utils/helper.util';
 import {atoms} from '../../utils/style.util';
 import {BankTarget} from '../bank-target/bank-target.component';
 import Pill from '../pill/pill.component';

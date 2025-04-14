@@ -9,13 +9,15 @@ import {fontSizes, radius, scale} from '../constants/style.constant';
 import {type ThemePalette} from '../constants/theme.constant';
 import {useTheme} from '../store/theme.store';
 
+// Define standard T-shirt size scale used for spacing, gaps, font sizes, etc.
 const tShirtSizes = ['xxs', 'xs', 'sm', 'md', 'lg', 'xl', 'xxl'] as const;
 type TShirtSize = (typeof tShirtSizes)[number];
 
-// Explicitly define T-shirt sizes that have a corresponding numeric radius key
+// Define T-shirt sizes specifically used for border-radius values.
 const radiusTShirtSizes = ['xxs', 'xs', 'sm', 'md', 'lg', 'xl'] as const;
 type RadiusTShirtSize = (typeof radiusTShirtSizes)[number];
 
+// Define standard font weight names mapped to their numeric string values.
 const fontWeights = {
   light: '300',
   regular: '400',
@@ -25,11 +27,19 @@ const fontWeights = {
 } as const;
 type FontWeightName = keyof typeof fontWeights;
 
-// --- Define types for generated atoms ---
+// ===========================================================================
+// Type Definitions for Atomic Styles
+// ===========================================================================
+
+// --- Define types for generated atoms based on T-shirt sizes and font weights ---
+
+// Types for gap properties (gap, columnGap, rowGap).
 type GapAtomKey =
   | `gap_${TShirtSize}`
   | `gap_x_${TShirtSize}`
   | `gap_y_${TShirtSize}`;
+
+// Types for margin and padding properties.
 type SpacingAtomKey =
   | `m_${TShirtSize}`
   | `mt_${TShirtSize}`
@@ -45,8 +55,14 @@ type SpacingAtomKey =
   | `pr_${TShirtSize}`
   | `px_${TShirtSize}`
   | `py_${TShirtSize}`;
+
+// Types for font size properties.
 type FontSizeAtomKey = `text_${TShirtSize}`;
+
+// Types for font weight properties.
 type FontWeightAtomKey = `font_${FontWeightName}`;
+
+// Types for border radius properties.
 type RadiusAtomKey = `rounded_${RadiusTShirtSize}`;
 
 // --- Define type for manually defined static atom keys ---
@@ -115,7 +131,7 @@ type StaticAtomKey =
   | 'overflow_visible'
   | 'overflow_scroll';
 
-// --- Define combined type for ALL atom keys ---
+// --- Define combined type for ALL possible atom keys (static + generated) ---
 type AtomKey =
   | StaticAtomKey
   | GapAtomKey
@@ -124,18 +140,25 @@ type AtomKey =
   | FontWeightAtomKey
   | RadiusAtomKey;
 
-// --- Generate atoms with explicit types ---
+// ===========================================================================
+// Atom Generation (Programmatic)
+// ===========================================================================
 
+// --- Generate atoms with explicit types based on scale/constants ---
+
+// Generates gap atoms (e.g., gap_sm, gap_x_md, gap_y_lg).
 const gapAtoms = Object.fromEntries(
   tShirtSizes.flatMap(size => [
-    [`gap_${size}`, {gap: scale[size]} as ViewStyle],
-    [`gap_x_${size}`, {columnGap: scale[size]} as ViewStyle],
-    [`gap_y_${size}`, {rowGap: scale[size]} as ViewStyle],
+    [`gap_${size}`, {gap: scale[size]} as ViewStyle], // Overall gap
+    [`gap_x_${size}`, {columnGap: scale[size]} as ViewStyle], // Horizontal gap (in flex row)
+    [`gap_y_${size}`, {rowGap: scale[size]} as ViewStyle], // Vertical gap (in flex col)
   ]),
 ) as Record<GapAtomKey, ViewStyle>;
 
+// Generates margin and padding atoms (e.g., m_sm, pt_lg, px_md).
 const spacingAtoms = Object.fromEntries(
   tShirtSizes.flatMap(size => [
+    // Margins
     [`m_${size}`, {margin: scale[size]} as ViewStyle],
     [`mt_${size}`, {marginTop: scale[size]} as ViewStyle],
     [`mb_${size}`, {marginBottom: scale[size]} as ViewStyle],
@@ -153,28 +176,35 @@ const spacingAtoms = Object.fromEntries(
   ]),
 ) as Record<SpacingAtomKey, ViewStyle>;
 
+// Generates font size atoms (e.g., text_sm, text_lg).
 const fontSizeAtoms = Object.fromEntries(
   tShirtSizes.map(size => [
-    `text_${size}`,
-    {fontSize: fontSizes[size]} as TextStyle,
+    `text_${size}`, // Key (e.g., text_sm)
+    {fontSize: fontSizes[size]} as TextStyle, // Style object (e.g., { fontSize: 14 })
   ]),
 ) as Record<FontSizeAtomKey, TextStyle>;
 
+// Generates font weight atoms (e.g., font_regular, font_bold).
 const fontWeightAtoms = Object.fromEntries(
   Object.entries(fontWeights).map(([name, value]) => [
-    `font_${name}`,
-    {fontWeight: value} as TextStyle, // No need for 'as TextStyle['fontWeight']'
+    `font_${name}`, // Key (e.g., font_bold)
+    {fontWeight: value} as TextStyle, // Style object (e.g., { fontWeight: '700' })
   ]),
 ) as Record<FontWeightAtomKey, TextStyle>;
 
+// Generates border radius atoms (e.g., rounded_sm, rounded_lg).
 const radiusAtoms = Object.fromEntries(
   radiusTShirtSizes.map(size => [
-    `rounded_${size}`,
-    {borderRadius: radius[size]} as ViewStyle,
+    `rounded_${size}`, // Key (e.g., rounded_md)
+    {borderRadius: radius[size]} as ViewStyle, // Style object (e.g., { borderRadius: 8 })
   ]),
 ) as Record<RadiusAtomKey, ViewStyle>;
 
-// --- Combine static and generated atoms ---
+// ===========================================================================
+// Static and Combined Atoms Definition
+// ===========================================================================
+
+// --- Define static atoms manually --- (Common utility styles)
 const staticAtoms = {
   // --- Display & Flexbox ---
   hidden: {display: 'none'} as ViewStyle,
@@ -255,21 +285,36 @@ const staticAtoms = {
   overflow_scroll: {overflow: 'scroll'} as ViewStyle,
 };
 
-// Explicitly type the final atoms object for StyleSheet.create
+// Explicitly type the final atoms object for StyleSheet.create compatibility.
+// This ensures all keys map to valid ViewStyle or TextStyle.
 type StaticAtomStyle = ViewStyle | TextStyle;
+
+// Create the final StyleSheet object containing all static and generated atoms.
+// Using StyleSheet.create provides performance benefits (caching, sending over bridge).
 export const atoms =
   StyleSheet.create<Record<AtomKey, StaticAtomStyle>>(staticAtoms);
 
-// --- Themed Atoms Hook (using Context) ---
+// ===========================================================================
+// Themed Atoms Hook
+// ===========================================================================
 
+// Type definition for the structure of themed atom styles (bg_*, text_*, border_*).
 type ThemedAtomStyles = {
   [key: string]: ViewStyle | TextStyle;
 };
 
+/**
+ * Creates a style object containing theme-dependent atomic styles.
+ * Generates background color, text color, and border color styles based on the theme palette.
+ * @param theme The ThemePalette object containing the current theme's colors.
+ * @returns An object where keys are themed atom names (e.g., `bg_primary`) and values are style objects.
+ */
 const createThemedAtomStyles = (theme: ThemePalette): ThemedAtomStyles => {
   const styles: ThemedAtomStyles = {};
+  // Iterate over the theme palette (e.g., { primary: '#ff6600', ... }).
   for (const [key, value] of Object.entries(theme)) {
-    const colorName = key as keyof ThemePalette;
+    const colorName = key as keyof ThemePalette; // e.g., 'primary'
+    // Generate styles for background, text, and border colors.
     styles[`bg_${colorName}`] = {backgroundColor: value as ColorValue};
     styles[`text_${colorName}`] = {color: value as ColorValue};
     styles[`border_${colorName}`] = {borderColor: value as ColorValue};
@@ -277,15 +322,27 @@ const createThemedAtomStyles = (theme: ThemePalette): ThemedAtomStyles => {
   return styles;
 };
 
-// Hook to get themed atoms using Context state
+/**
+ * Custom hook to access theme-dependent atomic styles.
+ * Retrieves the current theme from the global state/context,
+ * generates the corresponding themed styles (background, text, border colors),
+ * and memoizes the result using StyleSheet.create for performance.
+ *
+ * @returns A StyleSheet object containing the themed atoms for the current theme.
+ */
 export const useThemeAtoms = () => {
+  // Get the current theme object from the theme store/context.
   const {theme} = useTheme();
 
-  // Use useMemo to prevent re-creating the StyleSheet on every render
+  // Memoize the creation of themed styles.
+  // This ensures StyleSheet.create is only called when the theme object actually changes.
   const themedStyles = useMemo(() => {
+    // Generate the raw style objects for the current theme.
     const themedAtomStyles = createThemedAtomStyles(theme);
+    // Create a StyleSheet for performance.
     return StyleSheet.create(themedAtomStyles);
-  }, [theme]);
+  }, [theme]); // Dependency array ensures recalculation only when theme changes.
 
+  // Return the memoized StyleSheet object containing themed atoms.
   return themedStyles;
 };

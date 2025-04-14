@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
-import {doWithRetry} from '../../../utils/helper';
-import Logger from '../../../utils/logger';
+import {doWithRetry} from '../../../utils/helper.util';
+import Logger from '../../../utils/logger.util';
 
 interface UseAPIState<U> {
   data: U | null;

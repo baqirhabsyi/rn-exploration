@@ -1,5 +1,7 @@
 import {colors as baseColors} from './style.constant';
 
+// Defines the structure for a theme palette, specifying the names
+// and types of colors used throughout the application.
 export interface ThemePalette {
   primary: string;
   secondary: string;
@@ -22,6 +24,9 @@ export interface ThemePalette {
   divider: string;
 }
 
+// Light theme palette configuration.
+// Maps semantic color names (e.g., 'primary', 'background') to specific color values.
+// It utilizes base colors defined in './style.constant' where appropriate.
 export const lightTheme: ThemePalette = {
   primary: baseColors.orange.base, // Use existing orange
   secondary: baseColors.green.base, // Use existing green
@@ -46,6 +51,9 @@ export const lightTheme: ThemePalette = {
   divider: baseColors.gray.light,
 };
 
+// Dark theme palette configuration.
+// Provides alternative color values suitable for a dark user interface.
+// It also utilizes base colors from './style.constant'.
 export const darkTheme: ThemePalette = {
   primary: baseColors.orange.base,
   secondary: baseColors.green.base,
@@ -70,5 +78,8 @@ export const darkTheme: ThemePalette = {
   inputPlaceholder: '#8E8E93',
 };
 
+// Exports the type definition for a theme, deriving it from the lightTheme object.
+// This ensures any theme object conforms to the structure of lightTheme.
 export type Theme = typeof lightTheme;
+// Exports a union type representing the possible theme names.
 export type ThemeType = 'light' | 'dark';
